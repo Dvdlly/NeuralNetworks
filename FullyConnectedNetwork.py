@@ -85,3 +85,22 @@ class FullyConnectedNN(object):
 
     def sigmoid_derivative(self,z):
         return self.sigmoid(z) * (1-self.sigmoid(z))
+
+    def save(self, file):
+        data = {"sizes": self.sizes,
+                "weights": [w.tolist() for w in self.weights],
+                "biases": [b.tolist() for b in self.biases],
+                "cost": str(self.cost.__name__)}
+        f = open(file, "w")
+        json.dump(data, f)
+        f.close()
+
+def load(file):
+    f = open(file, "r")
+    data = json.load(f)
+    f.close()
+    cost = getattr(sys.modules[__name__], data["cost"])
+    net = Network(data["sizes"], cost=cost)
+    net.weights = [np.array(w) for w in data["weights"]]
+    net.biases = [np.array(b) for b in data["biases"]]
+    return net
